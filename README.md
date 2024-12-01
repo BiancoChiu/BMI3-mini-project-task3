@@ -2,7 +2,7 @@
 Task: Chromatin state predictor
 
 
-Developed By: DENG Yanqi, Duan Wenzhuo, GU Chengbin, SHEN Yu, ZHAO Bingkang
+Developed By: DENG Yanqi, DUAN Wenzhuo, GU Chengbin, SHEN Yu, ZHAO Bingkang
 
 
 ---
