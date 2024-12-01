@@ -224,7 +224,7 @@ canvas.create_text(
     584.0,
     810.0,
     anchor="nw",
-    text="Developed By: DENG Yanqi, Duan Wenzhuo, GU Chengbin, SHEN Yu, ZHAO Bingkang",
+    text="Developed By: DENG Yanqi, DUAN Wenzhuo, GU Chengbin, SHEN Yu, ZHAO Bingkang",
     fill="#000000",
     font=("Inter", 15 * -1)
 )
