@@ -36,18 +36,14 @@ def main():
     train_data, train_histone_names = read_all_bed_file(train_dir, chrom, start, end)
     train_data = generate_multiple_sequence(train_data)
     train_observation = map_observations(train_data).reshape(1, -1)
-
-
     
     if args.train:
         extra_data, extra_histone_names = read_all_bed_file(args.train, chrom, start, end)
         extra_data = generate_multiple_sequence(extra_data)
         extra_observation = map_observations(extra_data).reshape(1, -1)
         train_observation = np.concatenate((train_observation, extra_observation), axis=1)
-        print(train_observation.shape)
 
-
-    transition = np.array([[0.6, 0.4], [0.6, 0.4]])
+    transition = np.array([[0.4, 0.6], [0.4, 0.6]])
     emission = np.array([[1 / 16] * 16, [1 / 16] * 16])
     initial = np.array([[0.5, 0.5]])
     log_transition = np.log(transition)
@@ -66,12 +62,17 @@ def main():
     hmm.adjust_emission_matrix(test_mods)
 
     path, path_prob = hmm.viterbi_log(test_observation)
+    if hmm.log_initial[0] < hmm.log_initial[1]:
+        path = -path + 1
     sequence_to_bed(path, chrom, start).to_csv(os.path.join(args.output, 'predicted_accessibility.bed'), sep='\t', index=False, header=False)
 
-    atac_filepath = args.atac if args.atac else os.path.join(root_path, 'ATAC-seq/Sample_0382.bed')
+    atac_filepath = args.atac if args.atac else os.path.join(root_path, 'ATAC-seq/merged_ATAC.bed')
     atac = read_bed_file(atac_filepath)
     atac = create_binary_sequence(atac, chrom, start, end)
     predicted_probs = calculate_predicted_probs(hmm, test_observation)
+
+    if hmm.log_initial[0] < hmm.log_initial[1]:
+        predicted_probs = 1 - predicted_probs
     draw_roc(atac.tolist(), predicted_probs)
     # draw_tracks(os.path.join(args.output, 'predicted_accessibility.bed'), atac_filepath, args.output, chrom, start, end)
 

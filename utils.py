@@ -55,6 +55,10 @@ def create_binary_sequence(bed_df: pd.DataFrame, chrom: str, start: int, end: in
     if len(chrom_df) == 0:
         logging.error(f"no data for chromosome {chrom}")
         raise ValueError(f"")
+    
+    if start >= end:
+        logging.error(f"start position {start} is larger than end position {end}")
+        raise ValueError(f"")
 
     length = end - start
     num_fragments = (length + frag - 1) // frag

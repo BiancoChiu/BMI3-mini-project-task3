@@ -1,10 +1,22 @@
 import numpy as np
-
+from typing import Optional, Tuple, List
 from utils import *
 
 
 class HMM:
-    def __init__(self, N, M, transition=None, emission=None, initial=None):
+    def __init__(self, N: int, M: int, transition: Optional[np.ndarray] = None, 
+                 emission: Optional[np.ndarray] = None, 
+                 initial: Optional[np.ndarray] = None) -> None:
+        """
+        Initializes the Hidden Markov Model (HMM) with the given parameters.
+
+        Args:
+            N (int): The number of hidden states.
+            M (int): The number of observation symbols.
+            transition (numpy.ndarray, optional): The transition probabilities matrix. Defaults to None.
+            emission (numpy.ndarray, optional): The emission probabilities matrix. Defaults to None.
+            initial (numpy.ndarray, optional): The initial state probabilities. Defaults to None.
+        """
         if transition is None:
             transition = np.ones((N, N))
             self.log_transition = np.log(transition / np.sum(transition, axis=1, keepdims=True))
@@ -23,7 +35,17 @@ class HMM:
         else:
             self.log_initial = np.log(initial / np.sum(initial, axis=1, keepdims=True))
     
-    def forward_log(self, obs):
+    def forward_log(self, obs: np.ndarray) -> Tuple[float, np.ndarray]:
+        """
+        Performs the forward algorithm to compute the log-probability of the observation sequence.
+
+        Args:
+            obs (numpy.ndarray): The observation sequence.
+
+        Returns:
+            log_prob (float): The log-probability of the observation sequence.
+            alpha (numpy.ndarray): The forward variable.
+        """
         T = obs.shape[1]
         N = self.log_transition.shape[0]
         
@@ -39,7 +61,16 @@ class HMM:
         log_prob = np.logaddexp.reduce(alpha[:, -1])
         return log_prob, alpha
     
-    def backward_log(self, obs):
+    def backward_log(self, obs: np.ndarray) -> np.ndarray:
+        """
+        Performs the backward algorithm to compute the log-probabilities of the future observations.
+
+        Args:
+            obs (numpy.ndarray): The observation sequence.
+
+        Returns:
+            beta (numpy.ndarray): The backward variable.
+        """
         T = obs.shape[1]
         N = self.log_transition.shape[0]
 
@@ -56,7 +87,17 @@ class HMM:
         
         return beta
     
-    def viterbi_log(self, obs):
+    def viterbi_log(self, obs: np.ndarray) -> Tuple[np.ndarray, float]:
+        """
+        Performs the Viterbi algorithm to find the most probable hidden state sequence.
+
+        Args:
+            obs (numpy.ndarray): The observation sequence.
+
+        Returns:
+            path (numpy.ndarray): The most probable sequence of hidden states.
+            P_best (float): The probability of the most probable path.
+        """
         T = obs.shape[1]
         N = self.log_transition.shape[0]
         
@@ -81,7 +122,17 @@ class HMM:
         
         return path, np.exp(P_best)
     
-    def baum_welch_log(self, obs, n_iter):
+    def baum_welch_log(self, obs: np.ndarray, n_iter: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        Performs the Baum-Welch algorithm to re-estimate the parameters of the HMM.
+
+        Args:
+            obs (numpy.ndarray): The observation sequence.
+            n_iter (int): The number of iterations for the algorithm.
+
+        Returns:
+            (numpy.ndarray, numpy.ndarray, numpy.ndarray): The updated transition, emission, and initial probabilities.
+        """
         N = self.log_transition.shape[0]
         M = self.log_emission.shape[1]
         T = obs.shape[1]
@@ -126,7 +177,13 @@ class HMM:
         
         return np.exp(self.log_transition), np.exp(self.log_emission), np.exp(self.log_initial)
 
-    def adjust_emission_matrix(self, selected_proteins):
+    def adjust_emission_matrix(self, selected_proteins: str) -> None:
+        """
+        Adjusts the emission matrix based on the selected proteins, remapping the observation space.
+
+        Args:
+            selected_proteins (str): A binary string indicating which proteins are selected.
+        """
         num_proteins = 4
         old_obs_space = range(2 ** num_proteins)  # 0, 1, ..., 15
 
@@ -157,11 +214,6 @@ class HMM:
         self.log_emission = log_emission_new
         print("emission matrix has been adjusted according to the selected proteins")
 
-    # def predict_hidden_states(self, observations, selected_proteins):
-        # obs_map=generate_obs_map(selected_proteins)
-        # obs_sequence = np.array([obs_map[o] for _,o in np.ndenumerate(observations)])
-        # path, path_prob = self.viterbi_log(observations.reshape(1, -1))
-        # return path, path_prob
 
 if __name__ == '__main__':
     np.random.seed(42)

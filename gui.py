@@ -18,7 +18,7 @@ TRAIN_PATH = None
 TEST_PATH = None
 # TRAIN_PATH = os.path.join(ROOT_PATH, 'Chip-seq/train/')
 # TEST_PATH = os.path.join(ROOT_PATH, 'Chip-seq/test/')
-ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/Sample_0382.bed')
+ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/merged_ATAC.bed')
 
 
 def relative_to_assets(path: str) -> Path:
@@ -75,9 +75,6 @@ def handle_main_click():
     """
     entry_1.delete("1.0", "end")
 
-    if TRAIN_PATH is None:
-        entry_1.insert("end", "Error: Training path is not selected.\n")
-        return
     if TEST_PATH is None:
         entry_1.insert("end", "Error: Testing path is not selected.\n")
         return
@@ -109,7 +106,6 @@ def handle_main_click():
 
     if TRAIN_PATH:
         extra_data, extra_histone_names = read_all_bed_file(TRAIN_PATH, chrom, start, end)
-        # entry_7.insert("end", f"Extra data:\n{'\\n'.join(extra_histone_names)}\n")
         entry_7.insert("end", f"Extra data:\n{extra_histone_names}\n")
 
         extra_data = generate_multiple_sequence(extra_data)
@@ -130,7 +126,6 @@ def handle_main_click():
 
     entry_1.insert("end", f"Loading testing data...\n")
     test_data, test_histone_names = read_all_bed_file(TEST_PATH, chrom, start, end)
-    # entry_7.insert("end", f"Testing data:\n{'\n'.join(test_histone_names)}\n")
     entry_7.insert("end", f"Testing data:\n{test_histone_names}\n")
     test_data = generate_multiple_sequence(test_data)
     test_observation = map_observations(test_data).reshape(1, -1)
@@ -139,11 +134,15 @@ def handle_main_click():
     hmm.adjust_emission_matrix(test_mods)
 
     path, path_prob = hmm.viterbi_log(test_observation)
+    if hmm.log_initial[0] < hmm.log_initial[1]:
+        path = -path + 1
     sequence_to_bed(path, chrom, start).to_csv(os.path.join(OUTPUT_PATH, 'predicted_accessibility.bed'), sep='\t', index=False, header=False)
 
     atac = read_bed_file(ATAC_PATH)
     atac = create_binary_sequence(atac, chrom, start, end)
     predicted_probs = calculate_predicted_probs(hmm, test_observation)
+    if hmm.log_initial[0] < hmm.log_initial[1]:
+        predicted_probs = 1 - predicted_probs
     save_roc(atac.tolist(), predicted_probs, os.path.join(OUTPUT_PATH, 'roc_curve.png'))
 
     display_image_on_label(entry_6, os.path.join(OUTPUT_PATH, 'roc_curve.png'))
