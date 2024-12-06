@@ -1,11 +1,8 @@
-import os
+import os, re
 import logging
 import numpy as np
 import pandas as pd
 from typing import List, Tuple, Set, Union
-
-
-HISTONE_MODIFICATIONS = ['H3K27ac', 'H3K27me3', 'H3K36me3', 'H3K9ac']
 
 
 def read_bed_file(file_path: str) -> pd.DataFrame:
@@ -158,7 +155,7 @@ def map_observations(observations: np.ndarray, mods: int = 4) -> np.ndarray:
     return np.array([obs_map[o] for _, o in np.ndenumerate(observations)])
 
 
-def modifications_to_binary(records: List[str]) -> int:
+def modifications_to_binary(records: List[str], modifications: List[str]) -> int:
     """
     Converts a list of modifications into a binary-encoded integer.
 
@@ -168,7 +165,7 @@ def modifications_to_binary(records: List[str]) -> int:
     Returns:
         int: Binary-encoded representation of modifications.
     """
-    modification_map = {mod: bit_position for mod, bit_position in zip(HISTONE_MODIFICATIONS, range(len(HISTONE_MODIFICATIONS)))}
+    modification_map = {mod: bit_position for mod, bit_position in zip(modifications, range(len(modifications)))}
     binary_result = 0
     
     for record in records:
@@ -183,7 +180,7 @@ def read_all_bed_file(
     chip_dir: str, chrom: str, start: int, end: int, frag: int = 200
 ) -> tuple[np.ndarray, list[str]]:
     """
-    Reads all BED files in a directory corresponding to predefined histone modifications,
+    Reads all BED files in a directory,
     converts them into binary sequences, and aggregates them into a single array.
 
     Args:
@@ -203,29 +200,24 @@ def read_all_bed_file(
     """
     result = []
     records = []
-    found_modifications = set()
+    mods = set()
 
     for filename in sorted(os.listdir(chip_dir)):
-        if filename.endswith('.bed') and any(mod in filename for mod in HISTONE_MODIFICATIONS):
+        if filename.endswith('.bed'):
+            mods.add([part for part in re.split('[._]', filename) if part][0])
             file_path = os.path.join(chip_dir, filename)
 
             data = read_bed_file(file_path)
             data = create_binary_sequence(data, chrom, start, end, frag)
             result.append(data)
-
             records.append(filename)
-
-
-            for mod in HISTONE_MODIFICATIONS:
-                if mod in filename:
-                    found_modifications.add(mod)
 
     if len(records) == 0:
         logging.error(f"No valid bed file found in {chip_dir}")
         raise ValueError(f"No valid bed file found in {chip_dir}")
 
-    logging.info(f"Read the following histone modifications: {', '.join(sorted(found_modifications))}")
-    return np.array(result), found_modifications
+    logging.info(f"Read the following histone modifications: {', '.join(sorted(mods))}")
+    return np.array(result), mods
 
 
 def sequence_to_bed(sequence: np.ndarray, chrom: str, start: int) -> pd.DataFrame:
@@ -291,5 +283,4 @@ def calculate_predicted_probs(hmm, test_observation: np.ndarray) -> np.ndarray:
 
 
 if __name__ == '__main__':
-    test = modifications_to_binary(['H3K27ac', 'H3K27me3', 'H3K36me3'])
-    print(map_observations(np.array([[1, 0, 1, 111, 0, 0, 1, 11]])))
+    pass

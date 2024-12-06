@@ -49,10 +49,15 @@ def main():
     
     test_dir = args.bed
     test_data, test_histone_names = read_all_bed_file(test_dir, chrom, start, end)
+
+    if not set(test_histone_names).issubset(set(train_histone_names)):
+        logging.error('Test histone names are not subset of train histone names')
+        return
+
     test_data = generate_multiple_sequence(test_data)
     test_observation = map_observations(test_data).reshape(1, -1)
 
-    test_mods = bin(modifications_to_binary(test_histone_names))[2:]
+    test_mods = bin(modifications_to_binary(test_histone_names, train_histone_names))[2:]
     hmm.adjust_emission_matrix(test_mods)
 
     path, path_prob = hmm.viterbi_log(test_observation)

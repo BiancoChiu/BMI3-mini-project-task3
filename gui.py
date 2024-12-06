@@ -130,11 +130,15 @@ def handle_main_click():
 
     entry_1.insert("end", f"Loading testing data...\n")
     test_data, test_histone_names = read_all_bed_file(TEST_PATH, chrom, start, end)
+    if not set(test_histone_names).issubset(set(train_histone_names)):
+        entry_1.insert("end", f"Error: Test histone names are not subset of train histone names\n")
+        return
+    
     entry_7.insert("end", f"Predicting data:\n{test_histone_names}\n")
     test_data = generate_multiple_sequence(test_data)
     test_observation = map_observations(test_data).reshape(1, -1)
 
-    test_mods = bin(modifications_to_binary(test_histone_names))[2:]
+    test_mods = bin(modifications_to_binary(test_histone_names, train_histone_names))[2:]
     hmm.adjust_emission_matrix(test_mods)
 
     path, path_prob = hmm.viterbi_log(test_observation)
