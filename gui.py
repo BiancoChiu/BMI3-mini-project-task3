@@ -40,7 +40,7 @@ def select_testing_path():
     file_path = filedialog.askdirectory(
         title="Select ChIP-seq BED directory for testing",
     )
-    entry_1.insert("end", f"ChIP-seq testing path: {file_path}\n")
+    entry_1.insert("end", f"ChIP-seq predicting path: {file_path}\n")
     TEST_PATH = file_path
 
 
@@ -130,7 +130,7 @@ def handle_main_click():
 
     entry_1.insert("end", f"Loading testing data...\n")
     test_data, test_histone_names = read_all_bed_file(TEST_PATH, chrom, start, end)
-    entry_7.insert("end", f"Testing data:\n{test_histone_names}\n")
+    entry_7.insert("end", f"Predicting data:\n{test_histone_names}\n")
     test_data = generate_multiple_sequence(test_data)
     test_observation = map_observations(test_data).reshape(1, -1)
 
