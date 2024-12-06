@@ -64,7 +64,7 @@ def main():
     path, path_prob = hmm.viterbi_log(test_observation)
     if hmm.log_initial[0] < hmm.log_initial[1]:
         path = -path + 1
-    sequence_to_bed(path, chrom, start).to_csv(os.path.join(args.output, 'predicted_accessibility.bed'), sep='\t', index=False, header=False)
+    sequence_to_bed(path, chrom, start).to_csv(os.path.join(args.output, 'predicted.bed'), sep='\t', index=False, header=False)
 
     atac_filepath = args.atac if args.atac else os.path.join(root_path, 'ATAC-seq/merged_ATAC.bed')
     atac = read_bed_file(atac_filepath)
@@ -74,7 +74,7 @@ def main():
     if hmm.log_initial[0] < hmm.log_initial[1]:
         predicted_probs = 1 - predicted_probs
     draw_roc(atac.tolist(), predicted_probs)
-    # draw_tracks(os.path.join(args.output, 'predicted_accessibility.bed'), atac_filepath, args.output, chrom, start, end)
+    # draw_tracks(os.path.join(args.output, 'predicted.bed'), atac_filepath, args.output, chrom, start, end)
 
 if __name__ == '__main__':
     main()
