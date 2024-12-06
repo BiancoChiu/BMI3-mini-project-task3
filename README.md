@@ -14,8 +14,8 @@ Developed By: DENG Yanqi, DUAN Wenzhuo, GU Chengbin, SHEN Yu, ZHAO Bingkang
 | `-o`, `--output`        | Path to save the output results.                              | Yes      | `output/`                 |
 | `-c`, `--chrom`         | Chromosome to analyze.                                        | Yes      | `1`                        |
 | `-t`, `--train`         | Path to ChIP-seq files for training.               | No       | `ChIP-seq/train`     |
-| `-s`, `--start`         | Start position of the chromosome (default: `0`).              | No       | `100000`                   |
-| `-e`, `--end`           | End position of the chromosome (default: `100000`).           | No       | `200000`                   |
+| `-s`, `--start`         | Start position of the chromosome (default: `0`).              | No       | `900000`                   |
+| `-e`, `--end`           | End position of the chromosome (default: `100000`).           | No       | `980000`                   |
 | `-a`, `--atac`          | Path to the ATAC-seq file for evaluation.                     | No       | `ATAC-seq/merged_ATAC.bed`        |
 
 ## Example Command
@@ -26,9 +26,9 @@ python main.py \
     -o output/ \
     -c 1 \
     -t ChIP-seq/train \
-    -s 100000 \
-    -e 200000 \
-    -a ATAC-seq/merged_ATAC.bed
+    -s 900000 \
+    -e 980000 \
+    -a ATAC-seq/GM12878_ATAC.bed
 
 # optional: start from gui
 python gui.py
