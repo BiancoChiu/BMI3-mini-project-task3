@@ -14,11 +14,12 @@ from visualization import *
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_PATH = os.path.join(ROOT_PATH, 'output')
 ASSETS_PATH = os.path.join(ROOT_PATH, 'assets/frame0')
-TRAIN_PATH = None
+# TRAIN_PATH = None
 TEST_PATH = None
-# TRAIN_PATH = os.path.join(ROOT_PATH, 'Chip-seq/train/')
+TRAIN_PATH = os.path.join(ROOT_PATH, 'Chip-seq/train/')
 # TEST_PATH = os.path.join(ROOT_PATH, 'Chip-seq/test/')
-ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/merged_ATAC.bed')
+ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/GM12878_ATAC.bed')
+# ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/H1_ATAC.bed')
 
 
 def relative_to_assets(path: str) -> Path:
@@ -41,6 +42,17 @@ def select_testing_path():
     )
     entry_1.insert("end", f"ChIP-seq testing path: {file_path}\n")
     TEST_PATH = file_path
+
+
+def select_atac_path():
+    global ATAC_PATH
+    file_path = filedialog.askopenfilename(
+        title="Select ATAC-seq BED directory for testing",
+        filetypes=[("BED files", "*.bed"), ("All files", "*.*")]
+    )
+    if file_path:
+        entry_1.insert("end", f"ATAC-seq path: {file_path}\n")
+        ATAC_PATH = file_path
 
 
 def display_image_on_label(label, image_path, margin=10):
@@ -103,15 +115,7 @@ def handle_main_click():
     train_data, train_histone_names = read_all_bed_file(os.path.join(ROOT_PATH, 'Chip-seq/train/'), chrom, start, end)
     train_data = generate_multiple_sequence(train_data)
     train_observation = map_observations(train_data).reshape(1, -1)
-
-    if TRAIN_PATH:
-        extra_data, extra_histone_names = read_all_bed_file(TRAIN_PATH, chrom, start, end)
-        entry_7.insert("end", f"Extra data:\n{extra_histone_names}\n")
-
-        extra_data = generate_multiple_sequence(extra_data)
-        extra_observation = map_observations(extra_data).reshape(1, -1)
-        train_observation = np.concatenate((train_observation, extra_observation), axis=1)
-        print(train_observation.shape)
+    entry_7.insert("end", f"Training data:\n{train_histone_names}\n")
     entry_1.insert("end", f"Training data loaded successfully.\n")
 
     transition = np.array([[0.6, 0.4], [0.6, 0.4]])
@@ -136,7 +140,7 @@ def handle_main_click():
     path, path_prob = hmm.viterbi_log(test_observation)
     if hmm.log_initial[0] < hmm.log_initial[1]:
         path = -path + 1
-    sequence_to_bed(path, chrom, start).to_csv(os.path.join(OUTPUT_PATH, 'predicted_accessibility.bed'), sep='\t', index=False, header=False)
+    sequence_to_bed(path, chrom, start).to_csv(os.path.join(OUTPUT_PATH, 'predicted.bed'), sep='\t', index=False, header=False)
 
     atac = read_bed_file(ATAC_PATH)
     atac = create_binary_sequence(atac, chrom, start, end)
@@ -147,7 +151,7 @@ def handle_main_click():
 
     display_image_on_label(entry_6, os.path.join(OUTPUT_PATH, 'roc_curve.png'))
     entry_1.insert("end", f"ROC curve saved successfully.\n")
-    draw_tracks(os.path.join(OUTPUT_PATH, 'predicted_accessibility.bed'), ATAC_PATH, OUTPUT_PATH, chrom, start, end)
+    draw_tracks(os.path.join(OUTPUT_PATH, 'predicted.bed'), ATAC_PATH, OUTPUT_PATH, chrom, start, end)
     to_transparent_background(os.path.join(OUTPUT_PATH, 'nice_image.png'))
     display_image_on_label(entry_2, os.path.join(OUTPUT_PATH, 'nice_image.png'))
     entry_1.insert("end", f"Tracks image saved successfully.\n")
@@ -204,18 +208,27 @@ button_1.place(
 
 canvas.create_text(
     43.0,
-    165.0,
+    140.0,
     anchor="nw",
-    text="ChIP-seq file path to train",
+    text="ChIP-seq path to train",
     fill="#000000",
     font=("Inter Bold", 15 * -1)
 )
 
 canvas.create_text(
     43.0,
-    212.0,
+    175.0,
     anchor="nw",
-    text="ChIP-seq file path to test",
+    text="ChIP-seq path to predict",
+    fill="#000000",
+    font=("Inter Bold", 15 * -1)
+)
+
+canvas.create_text(
+    43.0,
+    210.0,
+    anchor="nw",
+    text="ATAC-seq path to evaluate",
     fill="#000000",
     font=("Inter Bold", 15 * -1)
 )
@@ -285,7 +298,7 @@ button_2 = Button(
 )
 button_2.place(
     x=241.0,
-    y=160.999995931983,
+    y=140,
     width=24.41574217379093,
     height=24.41574217379093
 )
@@ -301,9 +314,25 @@ button_3 = Button(
 )
 button_3.place(
     x=241.0,
-    y=208.0,
+    y=175.0,
     width=24.0,
     height=24.0
+)
+
+button_image_4 = PhotoImage(
+    file=relative_to_assets("button_2.png"))
+button_4 = Button(
+    image=button_image_4,
+    borderwidth=0,
+    highlightthickness=0,
+    command=lambda: print("button_4 clicked"),
+    relief="flat"
+)
+button_4.place(
+    x=241.0,
+    y=210,
+    width=24.41574217379093,
+    height=24.41574217379093
 )
 
 entry_image_1 = PhotoImage(
@@ -473,6 +502,7 @@ entry_7.place(
 button_1.config(command=handle_main_click)
 button_2.config(command=select_training_path)
 button_3.config(command=select_testing_path)
+button_4.config(command=select_atac_path)
 
 window.resizable(False, False)
 window.mainloop()

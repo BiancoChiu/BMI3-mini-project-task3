@@ -16,7 +16,7 @@ def parse_arguments():
     parser.add_argument('-b', '--bed', help='ChIP-seq test file path', required=True)
     parser.add_argument('-o', '--output', help='output path', required=True)
     parser.add_argument('-c', '--chrom', help='choose a chromosome', required=True)
-    parser.add_argument('-t', '--train', help='extra ChIP-seq file path to add more data for training', default=None)
+    parser.add_argument('-t', '--train', help='ChIP-seq train file path')
     parser.add_argument('-s', '--start', help='chromosome start position', type=int)
     parser.add_argument('-e', '--end', help='chromosome end position', type=int)
     parser.add_argument('-a', '--atac', help='ATAC-seq file path')
@@ -32,16 +32,10 @@ def main():
     start = args.start if args.start else 0
     end = args.end if args.end else 100000
 
-    train_dir = os.path.join(root_path, 'Chip-seq/train/')
+    train_dir = args.train if args.train else os.path.join(root_path, 'Chip-seq/train/')
     train_data, train_histone_names = read_all_bed_file(train_dir, chrom, start, end)
     train_data = generate_multiple_sequence(train_data)
     train_observation = map_observations(train_data).reshape(1, -1)
-    
-    if args.train:
-        extra_data, extra_histone_names = read_all_bed_file(args.train, chrom, start, end)
-        extra_data = generate_multiple_sequence(extra_data)
-        extra_observation = map_observations(extra_data).reshape(1, -1)
-        train_observation = np.concatenate((train_observation, extra_observation), axis=1)
 
     transition = np.array([[0.4, 0.6], [0.4, 0.6]])
     emission = np.array([[1 / 16] * 16, [1 / 16] * 16])
@@ -66,14 +60,16 @@ def main():
         path = -path + 1
     sequence_to_bed(path, chrom, start).to_csv(os.path.join(args.output, 'predicted.bed'), sep='\t', index=False, header=False)
 
-    atac_filepath = args.atac if args.atac else os.path.join(root_path, 'ATAC-seq/merged_ATAC.bed')
-    atac = read_bed_file(atac_filepath)
-    atac = create_binary_sequence(atac, chrom, start, end)
-    predicted_probs = calculate_predicted_probs(hmm, test_observation)
 
-    if hmm.log_initial[0] < hmm.log_initial[1]:
-        predicted_probs = 1 - predicted_probs
-    draw_roc(atac.tolist(), predicted_probs)
+    if args.atac:
+        atac_filepath = args.atac
+        atac = read_bed_file(atac_filepath)
+        atac = create_binary_sequence(atac, chrom, start, end)
+        predicted_probs = calculate_predicted_probs(hmm, test_observation)
+        if hmm.log_initial[0] < hmm.log_initial[1]:
+            predicted_probs = 1 - predicted_probs
+        draw_roc(atac.tolist(), predicted_probs)
+
     # draw_tracks(os.path.join(args.output, 'predicted.bed'), atac_filepath, args.output, chrom, start, end)
 
 if __name__ == '__main__':
