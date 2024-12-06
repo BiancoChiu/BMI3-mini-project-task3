@@ -19,6 +19,7 @@ Developed By: DENG Yanqi, DUAN Wenzhuo, GU Chengbin, SHEN Yu, ZHAO Bingkang
 | `-a`, `--atac`          | Path to the ATAC-seq file for evaluation.                     | No       | `ATAC-seq/merged_ATAC.bed`        |
 
 ## Example Command
+
 ```python
 python main.py \
     -b ChIP-seq/test \
@@ -28,4 +29,33 @@ python main.py \
     -s 100000 \
     -e 200000 \
     -a ATAC-seq/merged_ATAC.bed
+
+# optional: start from gui
+python gui.py
+```
+
+## Structure
+```
+.
+├── README.md
+├── __init__.py
+├── gui.py
+├── main.py
+├── model.py
+├── utils.py
+├── visualization.py
+├── ATAC-seq
+│   └── ...
+├── ChIP-seq
+│   ├── extra
+│   ├── test
+│   │   └── ...
+│   └── train
+│       └── ...
+├── assets
+│   └── frame0
+│       └── ...
+├── output
+│   └── ...
+└── requirements.txt
 ```
