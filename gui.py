@@ -16,9 +16,10 @@ OUTPUT_PATH = os.path.join(ROOT_PATH, 'output')
 ASSETS_PATH = os.path.join(ROOT_PATH, 'assets/frame0')
 # TRAIN_PATH = None
 TEST_PATH = None
+ATAC_PATH = None
 TRAIN_PATH = os.path.join(ROOT_PATH, 'Chip-seq/train/')
-TEST_PATH = os.path.join(ROOT_PATH, 'Chip-seq/test/')
-ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/GM12878_ATAC.bed')
+# TEST_PATH = os.path.join(ROOT_PATH, 'Chip-seq/test/')
+# ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/GM12878_ATAC.bed')
 # ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/H1_ATAC.bed')
 
 
