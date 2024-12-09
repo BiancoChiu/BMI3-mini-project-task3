@@ -16,7 +16,7 @@ Developed By: DENG Yanqi, DUAN Wenzhuo, GU Chengbin, SHEN Yu, ZHAO Bingkang
 | `-t`, `--train`         | Path to ChIP-seq files for training.               | No       | `ChIP-seq/train`     |
 | `-s`, `--start`         | Start position of the chromosome (default: `0`).              | No       | `900000`                   |
 | `-e`, `--end`           | End position of the chromosome (default: `100000`).           | No       | `980000`                   |
-| `-a`, `--atac`          | Path to the ATAC-seq file for evaluation.                     | No       | `ATAC-seq/merged_ATAC.bed`        |
+| `-a`, `--atac`          | Path to the ATAC-seq file for evaluation.                     | No       | `ATAC-seq/GM12878_ATAC.bed`        |
 
 ## Example Command
 
@@ -54,8 +54,7 @@ python gui.py
 │   └── train
 │       └── ...
 ├── assets
-│   └── frame0
-│       └── ...
+│   └── ...
 ├── output
 │   └── ...
 └── requirements.txt

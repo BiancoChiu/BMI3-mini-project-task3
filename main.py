@@ -37,13 +37,13 @@ def main():
     train_data = generate_multiple_sequence(train_data)
     train_observation = map_observations(train_data).reshape(1, -1)
 
-    transition = np.array([[0.4, 0.6], [0.4, 0.6]])
-    emission = np.array([[1 / 16] * 16, [1 / 16] * 16])
+    transition = np.array([[0.6, 0.4], [0.6, 0.4]])
+    emission = np.array([[1 / 2**len(train_histone_names)] * (2**len(train_histone_names)), [1 / 2**len(train_histone_names)] * 2**len(train_histone_names)])
     initial = np.array([[0.5, 0.5]])
     log_transition = np.log(transition)
     log_emission = np.log(emission)
     log_initial = np.log(initial)
-    hmm = HMM(2, 16, log_transition, log_emission, log_initial)
+    hmm = HMM(2, 2**len(train_histone_names), log_transition, log_emission, log_initial)
 
     hmm.baum_welch_log(train_observation, 500)
     

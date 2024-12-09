@@ -17,7 +17,7 @@ ASSETS_PATH = os.path.join(ROOT_PATH, 'assets/frame0')
 # TRAIN_PATH = None
 TEST_PATH = None
 TRAIN_PATH = os.path.join(ROOT_PATH, 'Chip-seq/train/')
-# TEST_PATH = os.path.join(ROOT_PATH, 'Chip-seq/test/')
+TEST_PATH = os.path.join(ROOT_PATH, 'Chip-seq/test/')
 ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/GM12878_ATAC.bed')
 # ATAC_PATH = os.path.join(ROOT_PATH, 'ATAC-seq/H1_ATAC.bed')
 
@@ -47,7 +47,7 @@ def select_testing_path():
 def select_atac_path():
     global ATAC_PATH
     file_path = filedialog.askopenfilename(
-        title="Select ATAC-seq BED directory for testing",
+        title="Select ATAC-seq BED file for testing",
         filetypes=[("BED files", "*.bed"), ("All files", "*.*")]
     )
     if file_path:
@@ -119,12 +119,12 @@ def handle_main_click():
     entry_1.insert("end", f"Training data loaded successfully.\n")
 
     transition = np.array([[0.6, 0.4], [0.6, 0.4]])
-    emission = np.array([[1 / 16] * 16, [1 / 16] * 16])
+    emission = emission = np.array([[1 / 2**len(train_histone_names)] * (2**len(train_histone_names)), [1 / 2**len(train_histone_names)] * 2**len(train_histone_names)])
     initial = np.array([[0.5, 0.5]])
     log_transition = np.log(transition)
     log_emission = np.log(emission)
     log_initial = np.log(initial)
-    hmm = HMM(2, 16, log_transition, log_emission, log_initial)
+    hmm = HMM(2, 2**len(train_histone_names), log_transition, log_emission, log_initial)
     entry_1.insert("end", f"Training HMM model...\n")
     hmm.baum_welch_log(train_observation, 500)
 
