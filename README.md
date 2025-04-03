@@ -3,6 +3,7 @@ Task: Chromatin state predictor
 
 
 Developed By: DENG Yanqi, DUAN Wenzhuo, GU Chengbin, SHEN Yu, ZHAO Bingkang
+<img width="1212" alt="chr1" src="https://github.com/user-attachments/assets/fe4390d3-2dbb-446c-9ab8-1a7bac6e36ec" />
 
 
 ---
